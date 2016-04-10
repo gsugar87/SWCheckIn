@@ -3,15 +3,15 @@ This project contains two programs.  One is a twitterController that will look f
 
 In order to use the twitter program, you will need to create a twitterKeys.py file that has the following:
 
-consumerKey = 'xxxxxxxxxxxxxxxxxx'
+		consumerKey = 'xxxxxxxxxxxxxxxxxx'
 
-consumerSecret = 'xxxxxxxxxxxxxxxxxxx'
+		consumerSecret = 'xxxxxxxxxxxxxxxxxxx'
 
-accessToken = 'xxxxxxxxx-xxxxxxxxxxxxxxxx'
+		accessToken = 'xxxxxxxxx-xxxxxxxxxxxxxxxx'
 
-accessTokenSecret = 'xxxxxxxxxxxxxxxxxxxxx'
+		accessTokenSecret = 'xxxxxxxxxxxxxxxxxxxxx'
 
-username = '@xxxxxx'
+		username = '@xxxxxx'
 
 This is the twitter account's information. Google how to make a twitter app if you have questions about the above variables.
 
@@ -19,3 +19,8 @@ The program requires the chrome browser driver available here:
 https://sites.google.com/a/chromium.org/chromedriver/downloads
 
 The second program (which is the better one) is emailControl.py. This will check a gmail account for forwarded SW confirmation emails.  You need to make a file called emailKeys that has the login information.
+
+You will have to create a file called emailKeys.py with the following code:
+
+		username = 'your gmail username'
+		password = 'your gmail password'
