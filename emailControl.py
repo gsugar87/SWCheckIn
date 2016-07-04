@@ -343,7 +343,7 @@ def getInfoFromSubject(emailData):
     print info
     return [info]
     
-def monitorEmail(mail,verbose=False):
+def monitorEmail(mail,verbose=False,sendConfirmationEmail=False):
     if verbose:
         print('Starting to monitor email...')
     #start a while loop to read emails    
@@ -376,7 +376,8 @@ def monitorEmail(mail,verbose=False):
                         if verbose:
                             print(report)
                     #send the person an email
-                    sendEmailScheduled(emailData,infoList)
+                    if sendConfirmationEmail:
+                        sendEmailScheduled(emailData,infoList)
         except:
             'Error! (probably a connection error)'
             time.sleep(30) #sleep for an extra 30 seconds, for a total of 1 min
@@ -403,10 +404,20 @@ if __name__ == "__main__":
     #sign into email
     mail = signIn(verbose=True)
 
+    sendMail = input("Do you want to send confirmation emails (1 = yes)? \n")
+    if sendMail == 1:
+        sendConfEmail = True
+        print("We will send confirmation emails")
+    else:
+        sendConfEmail = False
+        print("Will not send confirmation emails")
+    
     threads = []
     
     emailThread = threading.Thread(target=monitorEmail,args = (mail,),
-                                   kwargs = {'verbose':True})
+                                   kwargs = {'verbose':True,
+                                   'sendConfirmationEmail':sendConfEmail})
+    time.sleep(1)
     threads.append(emailThread)
     emailThread.start()
     #p = re.compile(r'(?<![A-Z0-9])[A-Z0-9]{6}(?![A-Z0-9])')
