@@ -19,6 +19,7 @@ def getTimeZone(city):
     cityToTZ['*Reno'] = pytz.timezone("US/Pacific")
     cityToTZ['SFO'] = pytz.timezone("US/Pacific")
     cityToTZ['DEN'] = pytz.timezone("America/Denver")
+    cityToTZ['ABQ'] = pytz.timezone("US/Mountain")
     if cityShort == '*Reno':
         return cityToTZ[cityShort]
     else:
