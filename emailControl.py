@@ -29,6 +29,7 @@ nyc = pytz.timezone("America/New_York")
 deltaTime = datetime.timedelta(days=1,microseconds=50)
 queue = Queue.Queue()
 
+
 def signIn(verbose=False):
     mail = imaplib.IMAP4_SSL('imap.gmail.com')
     mail.login(username,password)
@@ -36,11 +37,13 @@ def signIn(verbose=False):
         print('Signed into ' + username)
     return mail
 
+
 def getSenderFromEmail(emailData):
     msg = email.message_from_string(emailData[0][1])
     sender = msg['From'][msg['From'].find('<')+1:
                          msg['From'].find('>')]
     return sender
+
 
 def getUnreadMessages(mail):
     mail.select()
@@ -48,6 +51,7 @@ def getUnreadMessages(mail):
     if (len(data) == 1) and data[0] == '':
         data = []
     return data
+
 
 def getEmailText(emailRaw):
     try:
@@ -65,6 +69,7 @@ def getEmailText(emailRaw):
                 emailString.append(body)
     return emailString
 
+
 def getEmailType(emailData):
     subject = email.message_from_string(emailData[0][1])['Subject']
     if 'Gmail Forwarding Confirmation' in subject:
@@ -80,7 +85,8 @@ def getEmailType(emailData):
     else:
         messageType = 'Unknown'
     return messageType
-    
+
+
 def getGmailForwardInfo(emailData):
     msgTextList = getEmailText(emailData[0][1])
     for msgText in msgTextList:
@@ -98,23 +104,24 @@ def getGmailForwardInfo(emailData):
         message = messages.problemWithGmailForwarding()
         info = {'message':message,
                 'toaddr':''}
-        print('Problem getting confirmation code from gmail forwarding')        
+        print('Problem getting confirmation code from gmail forwarding')
     return info
-        
+
+
 def getConfNum(msgText):
-    #get the confirmation number
+    # get the confirmation number
     if 'confNum=' in msgText:
         strIndexStart = msgText.find('confNum=')+8
         strIndexEnd = strIndexStart+6
         confNum = str(msgText[strIndexStart:strIndexEnd])
     else:
-        #get dictionary
+        # get dictionary
         d = enchant.Dict("en_US")
         pattern = re.compile(r'(?<![A-Za-z0-9])[A-Z0-9]{6}(?![A-Za-z0-9])')
         msgTextConfNumSearch = msgText[200:]
         regExSearch = pattern.search(msgTextConfNumSearch)
         while regExSearch:
-            #see if the found string is a real word
+            # see if the found string is a real word
             possibleConfNum = regExSearch.group()
             if not d.check(possibleConfNum):
                 confNum = str(possibleConfNum)
@@ -124,12 +131,13 @@ def getConfNum(msgText):
                 regExSearch = pattern.search(msgTextConfNumSearch)
     return confNum
 
+
 def getCheckInTime(msgText):
     if 'Southwest Airlines at *' in msgText:
         strIndexStart = msgText.find('Southwest Airlines at *')+23
         checkInTime = msgText[strIndexStart:strIndexStart+\
                       msgText[strIndexStart:strIndexStart+10].find('*')]
-        #see if there is another checkInTime
+        # see if there is another checkInTime
         if 'Southwest Airlines at *' in msgText[strIndexStart+1:]:
             strIndexStart = msgText[strIndexStart+1:].find('Southwest Airlines at *')+ \
                             23+strIndexStart+1
@@ -141,7 +149,7 @@ def getCheckInTime(msgText):
         strIndexStart = msgText.find('Southwest Airlines at') + 22
         checkInTime = str(msgText[strIndexStart:strIndexStart+\
                         msgText[strIndexStart:strIndexStart+10].find(' ')])
-                    #see if there is another checkInTime
+                    # see if there is another checkInTime
         if 'Southwest Airlines at' in msgText[strIndexStart+1:]:
             strIndexStart = msgText[strIndexStart+1:].find('Southwest Airlines at')+ \
                             22+strIndexStart+1
@@ -150,20 +158,21 @@ def getCheckInTime(msgText):
         else:
             checkInTime = [checkInTime]
     return checkInTime
-    
+
+
 def getCheckInDate(msgText):
     msgTextSplit = msgText.split()
     departIndex = msgTextSplit.index('Depart')
     checkInDateList = msgTextSplit[departIndex-4:departIndex-1]
-    #make sure we got the date
+    # make sure we got the date
     if checkInDateList[1] == '>':
         checkInDateList = msgTextSplit[departIndex-6:departIndex-3]
     checkInDate = checkInDateList[0] + ' ' + checkInDateList [1] + ' ' + checkInDateList[2]
-    #see if there is a return flight
+    # see if there is a return flight
     if 'Depart' in msgTextSplit[departIndex+1:]:
         departIndex = msgTextSplit[departIndex+1:].index('Depart') + departIndex + 1
         checkInDateList = msgTextSplit[departIndex-4:departIndex-1]
-        #make sure we got the date
+        # make sure we got the date
         if checkInDateList[1] == '>':
             checkInDateList = msgTextSplit[departIndex-6:departIndex-3]
         checkInDate = [checkInDate, checkInDateList[0] + ' ' + \
@@ -172,9 +181,10 @@ def getCheckInDate(msgText):
         checkInDate = [checkInDate]
     return checkInDate
 
+
 def getCheckInCity(msgText):
     msgTextSplit = msgText.split()
-    departIndex = msgTextSplit.index('Depart')    
+    departIndex = msgTextSplit.index('Depart')
     checkInCity = msgTextSplit[departIndex+1]
     if 'Depart' in msgTextSplit[departIndex+1:]:
         departIndex = msgTextSplit[departIndex+1:].index('Depart') + departIndex + 1
@@ -182,95 +192,45 @@ def getCheckInCity(msgText):
     else:
         checkInCity = [checkInCity]
     return checkInCity
-    
+
+
 def getInfoFromEmail(emailData):
     msgTextList = getEmailText(emailData[0][1])
     for msgText in msgTextList:
         confNum = getConfNum(msgText)
-        #see if there are multiple itineraries
+        # see if there are multiple itineraries
         msgTextSplit = msgText.split()
         if confNum in msgTextSplit:
             confNumIndex = msgTextSplit.index(confNum)
         else:
             confNumIndex = msgTextSplit.index('*'+confNum+'*')
         firstName = msgTextSplit[confNumIndex+1]
-        lastName =  msgTextSplit[confNumIndex+2]
-        #see if there are < formatting issues
+        lastName = msgTextSplit[confNumIndex+2]
+        if msgTextSplit[confNumIndex+4] == 'Date':
+            lastName = msgTextSplit[confNumIndex+3]
+            print("Make sure user used a middle initial")
+        # see if there are < formatting issues
         if firstName == '>':
             firstName = msgTextSplit[confNumIndex+2]
             lastName = msgTextSplit[confNumIndex+4]
         possible2ndConf = msgTextSplit[confNumIndex+3][1:-1]
-        if len(possible2ndConf) == 6 and \
-        not enchant.Dict("en_US").check(possible2ndConf):
+        if len(possible2ndConf) == 6 and not enchant.Dict("en_US").check(possible2ndConf):
             confNum = [confNum,str(possible2ndConf)]
             firstName = [firstName, str(msgTextSplit[confNumIndex+4])]
             lastName = [lastName, str(msgTextSplit[confNumIndex+5])]
         else:
             confNum = [confNum]
             firstName = [firstName]
-            lastName = [lastName]        
-                #get the time you need to check in
+            lastName = [lastName]
+                # get the time you need to check in
         checkInTime = getCheckInTime(msgText)
         checkInDate = getCheckInDate(msgText)
         checkInCity = getCheckInCity(msgText)
-#            
-#   OLD WAY TO GET FIRST AND LAST NAMES!! (NEED TO CHECK ON FREEDS EMAIL)
-#        
-#        
-#        if ('firstName=' in msgText) and ('lastName=' in msgText):
-#            strIndexStart = msgText.find('firstName=')+10
-#            strIndexEnd = msgText.find('&lastName=')
-#            firstName = str(msgText[strIndexStart:strIndexEnd])
-#            strIndexStart = msgText.find('lastName=')+9
-#            lastName = str(msgText[strIndexStart:strIndexStart+50])
-#            strIndexEnd = max(lastName.find('&'),lastName.find('Check'))
-#            print(lastName.find('&'))
-#            print(lastName.find('Check'))
-#            lastName = lastName[0:strIndexEnd]
-#        else:
-#            confNumIndex = msgText.find(confNum)
-#            print confNumIndex
-#            msgSearch = msgText[confNumIndex+6:confNumIndex+200]
-#            print msgSearch
-#            msgSearch = msgSearch.strip()
-#            firstName, lastName = msgSearch.split(' ')
-#            firstName = str(firstName)
-#            lastName = str(lastName)
-        
-#        if 'Arrival\r\n' in msgText:
-#            strIndexStart = msgText.find('Arrival\r\n')+9
-#            checkInDate = msgText[strIndexStart:strIndexStart+\
-#                          msgText[strIndexStart:strIndexStart+20].find('\r')]
-#        else:
-#            strIndexStart = msgText.find('Departure/Arrival')
-#            msgSplit = msgText[strIndexStart:].split('\n')[1:]
-#            for msgLine in msgSplit:
-#                if len(msgLine.strip()) > 0:
-#                    checkInDate = msgLine.strip()
-#                    break
-#        if '\r\nDepart ' in msgText:
-#            strIndexStart = msgText.find('\r\nDepart ') + 10
-#            checkInCity = msgText[strIndexStart:strIndexStart+\
-#                          msgText[strIndexStart:strIndexStart+50].find(' (')]
-#        else:
-#            strIndexStart = msgText.find(checkInDate)
-#            msgSplit = msgText[strIndexStart:].split('\n')[1:]
-#            numNoWhiteLines = 0
-#            for msgLine in msgSplit:
-#                if len(msgLine.strip()) > 0:
-#                    checkInCity = msgLine.strip()
-#                    numNoWhiteLines += 1
-#                    if numNoWhiteLines == 2:
-#                        msgDepartInfo = msgLine.split(' ')
-#                        checkInCity = str(msgDepartInfo[1])
-#                        checkInTime = str(msgDepartInfo[-3]+ ' ' + msgDepartInfo[-2])
-#                        break
-                    
-                    
+
         try:
             infoList = []
             for j in xrange(len(checkInDate)):
-                for i in xrange(len(firstName)):                        
+                for i in xrange(len(firstName)):
                     info = {'confNum':confNum[i],
                             'firstName':firstName[i],
                             'lastName':lastName[i],
@@ -284,9 +244,10 @@ def getInfoFromEmail(emailData):
         print(infoList)
         return infoList
 
+
 def sendEmail(emailText, emailData=None, toaddr=None, subject=''):
     if (emailData is None) and (toaddr is None):
-        print('Must supply a recipiant address or the email data')
+        print('Must supply a recipient address or the email data')
         return
     if toaddr is None:
         toaddr = getSenderFromEmail(emailData)
@@ -301,22 +262,25 @@ def sendEmail(emailText, emailData=None, toaddr=None, subject=''):
     print(subject)
     print(fromaddr)
     print(toaddr)
-    server.sendmail(fromaddr,toaddr,msg.as_string())
+    server.sendmail(fromaddr, toaddr, msg.as_string())
     return
-    
+
+
 def sendEmailScheduled(emailData,infoList):
     #get the sender
     print(messages.emailScheduled(infoList))
     sendEmail(messages.emailScheduled(infoList),emailData=emailData,
               subject='We got it!')
     return
-    
+
+
 def sendEmailGmailForwarding(emailData):
     #get the forwarding info
     info = getGmailForwardInfo(emailData)
     sendEmail(info['message'], emailData=emailData,
               subject='Almost there!',toaddr=info['toaddr'])
     return
+
 
 def getInfoFromSubject(emailData):
     subject = email.message_from_string(emailData[0][1])['Subject']
@@ -342,11 +306,12 @@ def getInfoFromSubject(emailData):
             'city':checkInCity}
     print info
     return [info]
-    
+
+
 def monitorEmail(mail,verbose=False,sendConfirmationEmail=False):
     if verbose:
         print('Starting to monitor email...')
-    #start a while loop to read emails    
+    #start a while loop to read emails
     while True:
         try:
             unreadMsgs = getUnreadMessages(mail)[0].split()
@@ -369,7 +334,7 @@ def monitorEmail(mail,verbose=False,sendConfirmationEmail=False):
                     print('Unknown email!')
                 #see if info is the correct length
                 if len(infoList) > 0:
-                    for info in infoList:                    
+                    for info in infoList:
                         #we have the correct information!
                         #start the scheduler
                         report = startCheckInThread(info)
@@ -382,6 +347,7 @@ def monitorEmail(mail,verbose=False,sendConfirmationEmail=False):
             'Error! (probably a connection error)'
             time.sleep(30) #sleep for an extra 30 seconds, for a total of 1 min
         time.sleep(30)
+
 
 def startCheckInThread(info):
     if len(info) >= 4:
@@ -411,9 +377,9 @@ if __name__ == "__main__":
     else:
         sendConfEmail = False
         print("Will not send confirmation emails")
-    
+
     threads = []
-    
+
     emailThread = threading.Thread(target=monitorEmail,args = (mail,),
                                    kwargs = {'verbose':True,
                                    'sendConfirmationEmail':sendConfEmail})
