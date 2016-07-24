@@ -112,12 +112,15 @@ def checkin(info,keepOpen=False):
         buttonFinal.click()
         time.sleep(0.5)
         if not keepOpen:
-            browser.close()
+            #browser.close()
+            browser.quit()
+        print('successful checkin!')
         report = messages.successfulCheckIn()
         status = 1
     except:
         if not keepOpen:
-            browser.close()
+            #browser.close()
+            browser.quit()
         report = messages.failedCheckIn()
         status = -1
     return [status, report]

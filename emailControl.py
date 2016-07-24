@@ -213,6 +213,10 @@ def getInfoFromEmail(emailData):
         if firstName == '>':
             firstName = msgTextSplit[confNumIndex+2]
             lastName = msgTextSplit[confNumIndex+4]
+        if lastName == '>':
+            print("AAAH")
+            print(msgTextSplit[confNumIndex+3])
+            lastName = msgTextSplit[confNumIndex+3]
         possible2ndConf = msgTextSplit[confNumIndex+3][1:-1]
         if len(possible2ndConf) == 6 and not enchant.Dict("en_US").check(possible2ndConf):
             confNum = [confNum,str(possible2ndConf)]
