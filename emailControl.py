@@ -26,7 +26,7 @@ import timezoneParser
 username = emailKeys.username
 password = emailKeys.password
 nyc = pytz.timezone("America/New_York")
-deltaTime = datetime.timedelta(days=1,microseconds=50)
+deltaTime = datetime.timedelta(days=1, microseconds=50)
 queue = Queue.Queue()
 
 
@@ -149,7 +149,7 @@ def getCheckInTime(msgText):
         strIndexStart = msgText.find('Southwest Airlines at') + 22
         checkInTime = str(msgText[strIndexStart:strIndexStart+\
                         msgText[strIndexStart:strIndexStart+10].find(' ')])
-                    # see if there is another checkInTime
+        # see if there is another checkInTime
         if 'Southwest Airlines at' in msgText[strIndexStart+1:]:
             strIndexStart = msgText[strIndexStart+1:].find('Southwest Airlines at')+ \
                             22+strIndexStart+1
@@ -226,7 +226,7 @@ def getInfoFromEmail(emailData):
             confNum = [confNum]
             firstName = [firstName]
             lastName = [lastName]
-                # get the time you need to check in
+        # get the time you need to check in
         checkInTime = getCheckInTime(msgText)
         checkInDate = getCheckInDate(msgText)
         checkInCity = getCheckInCity(msgText)
@@ -271,7 +271,7 @@ def sendEmail(emailText, emailData=None, toaddr=None, subject=''):
 
 
 def sendEmailScheduled(emailData,infoList):
-    #get the sender
+    # get the sender
     print(messages.emailScheduled(infoList))
     sendEmail(messages.emailScheduled(infoList),emailData=emailData,
               subject='We got it!')
@@ -279,7 +279,7 @@ def sendEmailScheduled(emailData,infoList):
 
 
 def sendEmailGmailForwarding(emailData):
-    #get the forwarding info
+    # get the forwarding info
     info = getGmailForwardInfo(emailData)
     sendEmail(info['message'], emailData=emailData,
               subject='Almost there!',toaddr=info['toaddr'])
@@ -293,7 +293,7 @@ def getInfoFromSubject(emailData):
     firstName = subject[subject.find('/')+1:]
     lastName = subjectSplit[3][1:subjectSplit[3].find('/')]
     checkInDate = subjectSplit[1][1:-1]
-    #get the check in time from the email text
+    # get the check in time from the email text
     msgText = getEmailText(emailData[0][1])[0]
     startIndex = msgText.find('Southwest Airlines at *')+23
     checkInTimeSegment = msgText[startIndex:startIndex+10]
@@ -315,15 +315,15 @@ def getInfoFromSubject(emailData):
 def monitorEmail(mail,verbose=False,sendConfirmationEmail=False):
     if verbose:
         print('Starting to monitor email...')
-    #start a while loop to read emails
+    # start a while loop to read emails
     while True:
         try:
             unreadMsgs = getUnreadMessages(mail)[0].split()
-            #go through all the messagse
+            # go through all the messagse
             for messageNum in unreadMsgs:
-                #get the message text
+                # get the message text
                 typ, emailData = mail.fetch(messageNum, '(RFC822)')
-                #see what type of email it is
+                # see what type of email it is
                 emailType = getEmailType(emailData)
                 infoList = []
                 if verbose:
@@ -336,11 +336,11 @@ def monitorEmail(mail,verbose=False,sendConfirmationEmail=False):
                     infoList = getInfoFromSubject(emailData)
                 elif verbose:
                     print('Unknown email!')
-                #see if info is the correct length
+                # see if info is the correct length
                 if len(infoList) > 0:
                     for info in infoList:
-                        #we have the correct information!
-                        #start the scheduler
+                        # we have the correct information!
+                        # start the scheduler
                         report = startCheckInThread(info)
                         if verbose:
                             print(report)
