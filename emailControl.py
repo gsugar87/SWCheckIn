@@ -32,7 +32,7 @@ queue = Queue.Queue()
 
 def signIn(verbose=False):
     mail = imaplib.IMAP4_SSL('imap.gmail.com')
-    mail.login(username,password)
+    mail.login(username, password)
     if verbose:
         print('Signed into ' + username)
     return mail
