@@ -206,9 +206,17 @@ def getInfoFromEmail(emailData):
             confNumIndex = msgTextSplit.index('*'+confNum+'*')
         firstName = msgTextSplit[confNumIndex+1]
         lastName = msgTextSplit[confNumIndex+2]
-        if msgTextSplit[confNumIndex+4] == 'Date':
+        if 'Passenger(s)' in firstName:
+            # See if there is a / in the name
+            if '/' in lastName:
+                firstName = lastName[lastName.index('/')+1:]
+                lastName = lastName[0:lastName.index('/')]
+            else:
+                print("PROBLEM PARSING THE FIRST AND LAST NAMES!")
+        elif msgTextSplit[confNumIndex+4] == 'Date':
             lastName = msgTextSplit[confNumIndex+3]
             print("Make sure user used a middle initial")
+
         # see if there are < formatting issues
         if firstName == '>':
             firstName = msgTextSplit[confNumIndex+2]
@@ -371,7 +379,7 @@ def startCheckInThread(info):
     return messageString
 
 if __name__ == "__main__":
-    #sign into email
+    # sign into email
     mail = signIn(verbose=True)
 
     sendMail = input("Do you want to send confirmation emails (1 = yes)? \n")
@@ -384,10 +392,10 @@ if __name__ == "__main__":
 
     threads = []
 
-    emailThread = threading.Thread(target=monitorEmail,args = (mail,),
-                                   kwargs = {'verbose':True,
-                                   'sendConfirmationEmail':sendConfEmail})
+    emailThread = threading.Thread(target=monitorEmail, args=(mail,),
+                                   kwargs={'verbose': True,
+                                   'sendConfirmationEmail': sendConfEmail})
     time.sleep(1)
     threads.append(emailThread)
     emailThread.start()
-    #p = re.compile(r'(?<![A-Z0-9])[A-Z0-9]{6}(?![A-Z0-9])')
+    # p = re.compile(r'(?<![A-Z0-9])[A-Z0-9]{6}(?![A-Z0-9])')

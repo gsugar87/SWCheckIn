@@ -9,9 +9,11 @@ import pytz
 from collections import defaultdict
 import datetime
 
-timeDelta = datetime.timedelta(days=1,microseconds=50)
+timeDelta = datetime.timedelta(days=1, microseconds=50)
+
 
 def getTimeZone(city):
+    # Default is US Eastern Standard Time
     cityShort = city[0:5]
     cityToTZ = defaultdict(lambda: pytz.timezone("America/New_York"))
     cityToTZ['*Long'] = pytz.timezone("America/New_York")
@@ -24,10 +26,15 @@ def getTimeZone(city):
     cityToTZ['SFO'] = pytz.timezone("US/Pacific")
     cityToTZ['DEN'] = pytz.timezone("America/Denver")
     cityToTZ['ABQ'] = pytz.timezone("US/Mountain")
+    if 'TUCSON' in city.upper():
+        return pytz.timezone('US/Arizona')
+    if 'DENVER' in city.upper():
+        return pytz.timezone('America/Denver')
     if cityShort == '*Reno':
         return cityToTZ[cityShort]
     else:
         return cityToTZ[city]
+
 
 def shortName(tz):
     return tz.localize(datetime.datetime(2001,1,1)).tzname()
