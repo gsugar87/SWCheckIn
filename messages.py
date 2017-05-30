@@ -60,7 +60,7 @@ def emailScheduled(infoList):
         messageStr = messageStr + 'You will be checked in 24 hours before your flight departure time.'
     else:
         messageStr = messageStr + 'I found ' + str(numItineraries) + \
-                     ' itinteraries in your email:' + '\n'
+                     ' itineraries in your email:' + '\n'
         for info in infoList:
             messageStr = messageStr + info['firstName'].title() + ' ' + info['lastName'].title() + \
             ', depart at ' + info['datetime'].strftime('%b %d, %I:%M:%S %p') + ' ' + \
