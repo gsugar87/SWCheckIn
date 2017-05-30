@@ -16,7 +16,9 @@ def getTimeZone(city):
     # Default is US Eastern Standard Time
     cityShort = city[0:5]
     cityToTZ = defaultdict(lambda: pytz.timezone("America/New_York"))
+    cityToTZ['AUSTIN'] = pytz.timezone("US/Central")
     cityToTZ['*Long'] = pytz.timezone("America/New_York")
+    cityToTZ['LOS'] = pytz.timezone("US/Pacific")
     cityToTZ['*Phoenix*'] = pytz.timezone("America/Phoenix")
     cityToTZ['*Omaha*'] = pytz.timezone("US/Central")
     cityToTZ['Omaha'] = pytz.timezone("US/Central")
