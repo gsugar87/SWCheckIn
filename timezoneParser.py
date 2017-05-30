@@ -16,9 +16,7 @@ def getTimeZone(city):
     # Default is US Eastern Standard Time
     cityShort = city[0:5]
     cityToTZ = defaultdict(lambda: pytz.timezone("America/New_York"))
-    cityToTZ['AUSTIN'] = pytz.timezone("US/Central")
     cityToTZ['*Long'] = pytz.timezone("America/New_York")
-    cityToTZ['LOS'] = pytz.timezone("US/Pacific")
     cityToTZ['*Phoenix*'] = pytz.timezone("America/Phoenix")
     cityToTZ['*Omaha*'] = pytz.timezone("US/Central")
     cityToTZ['Omaha'] = pytz.timezone("US/Central")
@@ -28,10 +26,14 @@ def getTimeZone(city):
     cityToTZ['SFO'] = pytz.timezone("US/Pacific")
     cityToTZ['DEN'] = pytz.timezone("America/Denver")
     cityToTZ['ABQ'] = pytz.timezone("US/Mountain")
-    if 'TUCSON' in city.upper():
-        return pytz.timezone('US/Arizona')
+    if 'AUSTIN' in city.upper():
+        return pytz.timezone("US/Central")
+    if 'LOS' in city.upper():
+        return pytz.timezone("US/Pacific")
     if 'DENVER' in city.upper():
         return pytz.timezone('America/Denver')
+    if 'TUCSON' in city.upper():
+        return pytz.timezone('US/Arizona')
     if cityShort == '*Reno':
         return cityToTZ[cityShort]
     else:
