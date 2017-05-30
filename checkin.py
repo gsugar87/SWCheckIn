@@ -11,8 +11,13 @@ from selenium.webdriver import Chrome
 import sys
 import messages
 from threading import Timer
+import sys
 
-CHROME_DRIVER_PATH = 'C:\ChromeDriver\chromedriver.exe'
+if sys.platform == 'linux2':
+    CHROME_DRIVER_PATH = '/home/gsugar/Downloads/chromedriver'
+else:
+    CHROME_DRIVER_PATH = 'C:\ChromeDriver\chromedriver.exe'
+
 #CHECKIN_BUTTON_XPATH = '//input[@type="submit" and @title="Check In"]'
 CHECKIN_BUTTON_XPATH = '//input[@type="submit" and @value="Check In"]'
 #CHECKIN_BUTTON_XPATH = '//input[@name="submitbutton" and @type="submit" and @value="Check In"]'
